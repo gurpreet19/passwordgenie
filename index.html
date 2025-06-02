@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Password Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif; /* Modern font */
+        }
+        /* Custom styles for a vibrant and modern feel */
+        .btn-primary {
+            @apply bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition duration-200 ease-in-out transform hover:scale-105;
+        }
+        .input-field { /* Not directly used but good to have a modern style for potential future inputs */
+            @apply mt-1 block w-full px-4 py-3 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm;
+        }
+        .checkbox-label {
+            @apply flex items-center space-x-3 cursor-pointer p-3 bg-white rounded-lg border border-gray-200 hover:border-indigo-400 hover:shadow-md transition-all duration-150;
+        }
+        .checkbox-input {
+            @apply h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 focus:ring-offset-0;
+        }
+        .card {
+            @apply bg-white/90 backdrop-blur-lg p-6 sm:p-8 rounded-xl shadow-2xl; /* Slightly transparent card */
+        }
+        .password-display {
+            @apply bg-gray-800 p-4 rounded-lg text-green-400 font-mono text-lg break-all shadow-inner;
+            min-height: 60px;
+        }
+        .copy-btn {
+            @apply bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition duration-150 ease-in-out text-sm transform hover:scale-105;
+        }
+        .toast {
+            @apply fixed bottom-5 right-5 bg-gray-900 text-white px-5 py-3 rounded-lg shadow-xl transition-all duration-300 transform;
+        }
+        .range-slider::-webkit-slider-thumb {
+            @apply appearance-none w-5 h-5 bg-indigo-600 rounded-full cursor-pointer shadow-md;
+        }
+        .range-slider::-moz-range-thumb {
+            @apply appearance-none w-5 h-5 bg-indigo-600 rounded-full cursor-pointer border-none shadow-md;
+        }
+        .range-slider {
+             @apply accent-indigo-600; /* For browsers that support accent-color */
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-sky-400 via-rose-400 to-lime-400 min-h-screen flex items-center justify-center p-4">
+
+    <div class="card w-full max-w-lg">
+        <h1 class="text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600 mb-8">Password Genie</h1>
+
+        <form id="passwordOptionsForm" class="space-y-6">
+            <div>
+                <label for="length" class="block text-sm font-medium text-gray-700 mb-2">Password Length: <span id="lengthValue" class="font-semibold text-indigo-700">12</span></label>
+                <input type="range" id="length" name="length" min="4" max="64" value="12" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer range-slider">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeUppercase" name="includeUppercase" class="checkbox-input" checked>
+                    <span class="text-sm font-medium text-gray-700">Uppercase (A-Z)</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeLowercase" name="includeLowercase" class="checkbox-input" checked>
+                    <span class="text-sm font-medium text-gray-700">Lowercase (a-z)</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeNumbers" name="includeNumbers" class="checkbox-input" checked>
+                    <span class="text-sm font-medium text-gray-700">Numbers (0-9)</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeSpecial" name="includeSpecial" class="checkbox-input" checked>
+                    <span class="text-sm font-medium text-gray-700">Special (!@#$)</span>
+                </label>
+            </div>
+            
+            <div>
+                <label class="checkbox-label !border-amber-300 hover:!border-amber-500">
+                    <input type="checkbox" id="easyToRemember" name="easyToRemember" class="checkbox-input !text-amber-500 focus:!ring-amber-400">
+                    <span class="text-sm font-medium text-gray-700">Easy to Remember (No l, 1, I, O, 0)</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">
+                Generate Password
+            </button>
+        </form>
+
+        <div class="mt-8">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Your Secure Password:</h2>
+            <div class="flex items-center space-x-3">
+                <div id="passwordResult" class="password-display flex-grow"></div>
+                <button id="copyButton" class="copy-btn" title="Copy to Clipboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1 -ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                </button>
+            </div>
+            <p id="messageArea" class="text-sm text-red-600 mt-2 h-5 font-medium"></p> </div>
+    </div>
+
+    <div id="toastNotification" class="toast opacity-0 invisible -translate-y-5" role="alert">Copied to clipboard!</div>
+
+    <script>
+        // DOM Elements
+        const passwordOptionsForm = document.getElementById('passwordOptionsForm');
+        const lengthSlider = document.getElementById('length');
+        const lengthValueDisplay = document.getElementById('lengthValue');
+        const includeUppercaseCheckbox = document.getElementById('includeUppercase');
+        const includeLowercaseCheckbox = document.getElementById('includeLowercase');
+        const includeNumbersCheckbox = document.getElementById('includeNumbers');
+        const includeSpecialCheckbox = document.getElementById('includeSpecial');
+        const easyToRememberCheckbox = document.getElementById('easyToRemember');
+        const passwordResultDiv = document.getElementById('passwordResult');
+        const copyButton = document.getElementById('copyButton');
+        const messageArea = document.getElementById('messageArea');
+        const toastNotification = document.getElementById('toastNotification');
+
+        // Character Sets
+        const ALL_LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+        const ALL_UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const ALL_NUMBERS = "0123456789";
+        const ALL_SPECIAL = "!@#$%^&*()_+-=[]{}|;:',.<>/?~";
+
+        const EASY_LOWERCASE = "abcdefghijkmnpqrstuvwxyz"; // Excludes: l, o
+        const EASY_UPPERCASE = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // Excludes: I, O
+        const EASY_NUMBERS = "23456789"; // Excludes: 0, 1
+        const EASY_SPECIAL = "!@#$*"; // Limited set
+
+        // Update length display
+        lengthSlider.addEventListener('input', (event) => {
+            lengthValueDisplay.textContent = event.target.value;
+        });
+
+        // Form submission handler
+        passwordOptionsForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            generatePassword();
+        });
+
+        // Copy to clipboard handler
+        copyButton.addEventListener('click', () => {
+            const password = passwordResultDiv.textContent;
+            if (!password) {
+                displayMessage("Nothing to copy!", true);
+                return;
+            }
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = password;
+            tempTextArea.style.position = 'absolute'; // Prevent screen scroll
+            tempTextArea.style.left = '-9999px';    // Move off-screen
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy'); 
+                showToast("Copied to clipboard!");
+                displayMessage("", false); 
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                displayMessage("Failed to copy password.", true);
+                 // Fallback for browsers that might not support execCommand or if it fails
+                navigator.clipboard.writeText(password).then(() => {
+                    showToast("Copied to clipboard! (fallback)");
+                    displayMessage("", false);
+                }).catch(err => {
+                    console.error('Fallback copy failed: ', err);
+                    displayMessage("Failed to copy password.", true);
+                });
+            }
+            document.body.removeChild(tempTextArea);
+        });
+
+        function generatePassword() {
+            const length = parseInt(lengthSlider.value);
+            const includeUppercase = includeUppercaseCheckbox.checked;
+            const includeLowercase = includeLowercaseCheckbox.checked;
+            const includeNumbers = includeNumbersCheckbox.checked;
+            const includeSpecial = includeSpecialCheckbox.checked;
+            const easyToRemember = easyToRememberCheckbox.checked;
+
+            let charPool = "";
+            let guaranteedChars = [];
+
+            const currentLowercase = easyToRemember ? EASY_LOWERCASE : ALL_LOWERCASE;
+            const currentUppercase = easyToRemember ? EASY_UPPERCASE : ALL_UPPERCASE;
+            const currentNumbers = easyToRemember ? EASY_NUMBERS : ALL_NUMBERS;
+            const currentSpecial = easyToRemember ? EASY_SPECIAL : ALL_SPECIAL;
+
+            if (includeLowercase) {
+                charPool += currentLowercase;
+                if (currentLowercase) guaranteedChars.push(getRandomChar(currentLowercase));
+            }
+            if (includeUppercase) {
+                charPool += currentUppercase;
+                if (currentUppercase) guaranteedChars.push(getRandomChar(currentUppercase));
+            }
+            if (includeNumbers) {
+                charPool += currentNumbers;
+                if (currentNumbers) guaranteedChars.push(getRandomChar(currentNumbers));
+            }
+            if (includeSpecial) {
+                charPool += currentSpecial;
+                if (currentSpecial) guaranteedChars.push(getRandomChar(currentSpecial));
+            }
+
+            if (charPool === "") {
+                displayMessage("Please select at least one character type.", true);
+                passwordResultDiv.textContent = "";
+                return;
+            }
+
+            // Ensure length is not less than the number of categories selected
+            // (as each category will contribute at least one character)
+            if (length < guaranteedChars.filter(c => c !== '').length) {
+                 displayMessage(`Length too short. Min for selected types: ${guaranteedChars.filter(c => c !== '').length}`, true);
+                passwordResultDiv.textContent = "";
+                return;
+            }
+            
+            displayMessage("", false);
+
+            // Fill the password array, ensuring each selected category is represented
+            let passwordArray = [...guaranteedChars.filter(c => c !== '')]; // Start with guaranteed characters
+            const remainingLength = length - passwordArray.length;
+
+            for (let i = 0; i < remainingLength; i++) {
+                passwordArray.push(getRandomChar(charPool));
+            }
+
+            shuffleArray(passwordArray);
+            
+            passwordResultDiv.textContent = passwordArray.join('');
+        }
+
+        function getRandomChar(characterSet) {
+            if (!characterSet || characterSet.length === 0) return ''; 
+            const randomIndex = Math.floor(Math.random() * characterSet.length);
+            return characterSet[randomIndex];
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function displayMessage(message, isError) {
+            messageArea.textContent = message;
+            if (isError) {
+                messageArea.classList.remove('text-emerald-600');
+                messageArea.classList.add('text-red-600');
+            } else {
+                messageArea.classList.remove('text-red-600');
+                // Optionally add a success color if needed, or just clear it
+                // messageArea.classList.add('text-emerald-600'); 
+            }
+        }
+        
+        let toastTimeout;
+        function showToast(message) {
+            toastNotification.textContent = message;
+            toastNotification.classList.remove('opacity-0', 'invisible', '-translate-y-5');
+            toastNotification.classList.add('opacity-100', 'visible', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastNotification.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                toastNotification.classList.add('opacity-0', 'invisible', '-translate-y-5');
+            }, 3000);
+        }
+
+        // Initial password generation on load
+        generatePassword();
+
+    </script>
+</body>
+</html>
